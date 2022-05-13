@@ -1,4 +1,7 @@
 # Mirage
+[![Mirage](https://github.com/OdyseeTeam/mirage/actions/workflows/go.yml/badge.svg?branch=master)](https://github.com/OdyseeTeam/mirage/actions/workflows/go.yml)
+[![Latest release](https://badgen.net/github/release/OdyseeTeam/mirage)](https://github.com/OdyseeTeam/mirage/releases)
+
 Mirage is a software that helps Odysee distribute static content on its platform. The following features are covered:
 1) images retrieval from any origin specified
 2) images optimization needed for web distribution

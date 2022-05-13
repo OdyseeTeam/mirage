@@ -1,0 +1,41 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.17.x
+
+      - name: Build linux
+        run: make linux
+
+      - name: Build macos
+        run: make macos
+
+      - name: Test
+        run: make test
+
+      - name: Zip macos
+        run: zip -r mirage_darwin_amd64.zip ./dist/darwin_amd64
+
+      - name: Zip linux
+        run: zip -r mirage_linux_amd64.zip ./dist/linux_amd64
+
+      - name: upload to github releases
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./mirage_darwin_amd64.zip
+            ./mirage_linux_amd64.zip

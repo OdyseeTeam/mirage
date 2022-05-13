@@ -7,19 +7,22 @@ on:
     branches: [ master ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.17.x
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.17.x
 
-    - name: Build
-      run: go build -v ./...
+      - name: Build linux
+        run: make linux
 
-    - name: Test
-      run: go test -v ./...
+      - name: Build macos
+        run: make macos
+
+      - name: Test
+        run: make test
