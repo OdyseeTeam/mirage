@@ -1,4 +1,4 @@
-version := $(shell git describe --tags)
+version := $(shell git describe --abbrev=0 --tags|sed 's/v//')
 commit := $(shell git rev-parse --short HEAD)
 commit_long := $(shell git rev-parse HEAD)
 branch := $(shell git rev-parse --abbrev-ref HEAD)
@@ -12,19 +12,22 @@ LDFLAGS="-s -w -X ${IMPORT_PATH}/internal/version.version=$(version) -X ${IMPORT
 test:
 	go test -cover ./...
 
+.PHONY: lint
+lint:
+	./scripts/lint.sh
+
+.PHONY: linux
 linux:
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o dist/linux_amd64/${BINARY} -ldflags ${LDFLAGS}
 
+.PHONY: macos
 macos:
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -o dist/darwin_amd64/${BINARY} -ldflags ${LDFLAGS}
 
-version := $(shell git describe --abbrev=0 --tags|sed 's/v//')
-cur_branch := $(shell git rev-parse --abbrev-ref HEAD)
 .PHONY: image
 image:
-	docker buildx build -t odyseeteam/${BINARY}:$(version) -t odyseeteam/${BINARY}:latest -t odyseeteam/${BINARY}:$(cur_branch) --platform linux/amd64 .
+	docker buildx build -t odyseeteam/${BINARY}:$(version) -t odyseeteam/${BINARY}:latest -t odyseeteam/${BINARY}:$(branch) --platform linux/amd64 .
 
-version := $(shell git describe --abbrev=0 --tags|sed 's/v//')
 .PHONY: publish_image
 publish_image:
 	docker push odyseeteam/${BINARY}:$(version)
