@@ -7,6 +7,7 @@ curtime := $(shell date "+%Y-%m-%d %T %Z")
 BINARY=mirage
 IMPORT_PATH=github.com/OdyseeTeam/mirage
 LDFLAGS="-s -w -X ${IMPORT_PATH}/internal/version.version=$(version) -X ${IMPORT_PATH}/internal/version.commit=$(commit) -X ${IMPORT_PATH}/internal/version.commitLong=$(commit_long) -X ${IMPORT_PATH}/internal/version.branch=$(branch) -X '${IMPORT_PATH}/internal/version.date=$(curtime)'"
+.DEFAULT_GOAL := linux
 
 .PHONY: test
 test:
