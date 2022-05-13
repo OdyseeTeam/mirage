@@ -1,4 +1,4 @@
-version := $(shell git describe --abbrev=0 --tags|sed 's/v//')
+version := $(shell git describe --abbrev=0 --tags)
 commit := $(shell git rev-parse --short HEAD)
 commit_long := $(shell git rev-parse HEAD)
 branch := $(shell git rev-parse --abbrev-ref HEAD)
@@ -26,12 +26,12 @@ macos:
 
 .PHONY: image
 image:
-	docker buildx build -t odyseeteam/${BINARY}:$(version) -t odyseeteam/${BINARY}:latest -t odyseeteam/${BINARY}:$(branch) --platform linux/amd64 .
+	docker buildx build -t odyseeteam/${BINARY}:$(version) -t odyseeteam/${BINARY}:latest --platform linux/amd64 .
 
 .PHONY: publish_image
 publish_image:
 	docker push odyseeteam/${BINARY}:$(version)
-	docker tag odyseeteam/${BINARY}:$(version) odyseeteam/${BINARY}:latest odyseeteam/${BINARY}:$(cur_branch)
+	docker tag odyseeteam/${BINARY}:$(version) odyseeteam/${BINARY}:latest
 	docker push odyseeteam/${BINARY}:latest
 
 tag := $(shell git describe --abbrev=0 --tags)
