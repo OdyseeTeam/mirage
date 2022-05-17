@@ -21,8 +21,8 @@ jobs:
       - name: Build linux
         run: make linux
 
-      - name: Build macos
-        run: make macos
+#      - name: Build macos
+#        run: make macos
 
       - name: Test
         run: make test

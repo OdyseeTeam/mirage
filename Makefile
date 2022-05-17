@@ -6,7 +6,7 @@ curtime := $(shell date "+%Y-%m-%d %T %Z")
 
 BINARY=mirage
 IMPORT_PATH=github.com/OdyseeTeam/mirage
-LDFLAGS="-extldflags '-Wl,--allow-multiple-definition' -s -w -X ${IMPORT_PATH}/internal/version.version=$(version) -X ${IMPORT_PATH}/internal/version.commit=$(commit) -X ${IMPORT_PATH}/internal/version.commitLong=$(commit_long) -X ${IMPORT_PATH}/internal/version.branch=$(branch) -X '${IMPORT_PATH}/internal/version.date=$(curtime)'"
+LDFLAGS="-s -w -X ${IMPORT_PATH}/internal/version.version=$(version) -X ${IMPORT_PATH}/internal/version.commit=$(commit) -X ${IMPORT_PATH}/internal/version.commitLong=$(commit_long) -X ${IMPORT_PATH}/internal/version.branch=$(branch) -X '${IMPORT_PATH}/internal/version.date=$(curtime)'"
 .DEFAULT_GOAL := linux
 
 .PHONY: test
@@ -21,9 +21,10 @@ lint:
 linux:
 	CGO_ENABLED=1 GOARCH=amd64 GOOS=linux go build -o dist/linux_amd64/${BINARY} -ldflags ${LDFLAGS}
 
-.PHONY: macos
-macos:
-	CGO_ENABLED=1 GOARCH=amd64 GOOS=darwin go build -o dist/darwin_amd64/${BINARY} -ldflags ${LDFLAGS}
+# disabled as I can't get it to cross compile from linux due to the C dependencies
+#.PHONY: macos
+#macos:
+#	CGO_ENABLED=1 GOARCH=amd64 GOOS=darwin go build -o dist/darwin_amd64/${BINARY} -ldflags ${LDFLAGS}
 
 .PHONY: image
 image:

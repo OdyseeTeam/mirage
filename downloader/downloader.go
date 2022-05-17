@@ -12,7 +12,9 @@ func DownloadFile(URL string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Err(err)
 	}
-	defer response.Body.Close()
+	defer func(body io.ReadCloser) {
+		_ = body.Close()
+	}(response.Body)
 
 	if response.StatusCode != 200 {
 		return nil, errors.Err("Received non 200 response code %d for %s", response.StatusCode, URL)

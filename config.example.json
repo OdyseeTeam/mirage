@@ -1,0 +1,19 @@
+{
+  "debugmode": true,
+  "local_db": {
+    "host": "mysql",
+    "user": "mirage",
+    "database": "mirage",
+    "password": "mirage"
+  },
+  "metadata_db": {
+    "host": "mysql",
+    "user": "mirage",
+    "database": "mirage",
+    "password": "mirage"
+  },
+  "disk_cache": {
+    "path": "/tmp/objects/",
+    "size": "2G"
+  }
+}

@@ -1,0 +1,50 @@
+version: "3.2"
+# you may need to run
+# mkdir database && sudo chmod 1001:10001 -R ./database
+# before starting up the container the first time
+services:
+  mysql:
+    container_name: mysql
+    image: percona:ps-8.0
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - ./database/mysql:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+#      - ./my.cnf:/etc/mysql/my.cnf
+    environment:
+      - MYSQL_USER=mirage
+      - MYSQL_PASSWORD=mirage
+      - MYSQL_DATABASE=mirage
+      - MYSQL_ROOT_PASSWORD=mirageroot
+    restart: always
+  mirage:
+    container_name: mirage
+    image: 'odyseeteam/mirage:latest'
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1M"
+        max-file: "3"
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    ports:
+      - "6456:6456"
+    volumes:
+      - "./objects_cache:/tmp/objects"
+      - "./config.json:/app/config.json"
+    entrypoint: >
+      ./mirage serve
+    depends_on:
+      - mysql
+  watchtower:
+    container_name: watchtower
+    image: 'containrrr/watchtower'
+    restart: always
+    command: "--interval 90 --cleanup --label-enable"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+#    environment:
+#      - REPO_USER=
+#      - REPO_PASS=

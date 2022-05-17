@@ -10,6 +10,7 @@ import (
 	"github.com/OdyseeTeam/gody-cdn/configs"
 	"github.com/OdyseeTeam/gody-cdn/store"
 	"github.com/OdyseeTeam/mirage/config"
+	"github.com/OdyseeTeam/mirage/metadata"
 	"github.com/OdyseeTeam/mirage/optimizer"
 	http "github.com/OdyseeTeam/mirage/server"
 
@@ -52,8 +53,12 @@ var serveCmd = &cobra.Command{
 			Size: viper.GetString("disk_cache.size"),
 		}
 		go cleanup.SelfCleanup(dbs, dbs, stopper, cacheParams)
-
-		httpServer := http.NewServer(optimizer.NewOptimizer(), dbs)
+		metadataDsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", viper.GetString("metadata_db.user"), viper.GetString("metadata_db.password"), viper.GetString("metadata_db.host"), viper.GetString("metadata_db.database"))
+		metadataManager, err := metadata.Init(metadataDsn)
+		if err != nil {
+			logrus.Fatal(errors.FullTrace(err))
+		}
+		httpServer := http.NewServer(optimizer.NewOptimizer(), dbs, metadataManager)
 		err = httpServer.Start(":6456")
 		if err != nil {
 			logrus.Fatal(err)

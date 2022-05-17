@@ -20,8 +20,8 @@ jobs:
       - name: Build linux
         run: make linux
 
-      - name: Build macos
-        run: make macos
+#      - name: Build macos
+#        run: make macos
 
       - name: Test
         run: make test
@@ -29,8 +29,8 @@ jobs:
       - name: Lint
         run: make lint
 
-      - name: Zip macos
-        run: zip -r mirage_darwin_amd64.zip ./dist/darwin_amd64
+#      - name: Zip macos
+#        run: zip -r mirage_darwin_amd64.zip ./dist/darwin_amd64
 
       - name: Zip linux
         run: zip -r mirage_linux_amd64.zip ./dist/linux_amd64
@@ -45,8 +45,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./mirage_darwin_amd64.zip
             ./mirage_linux_amd64.zip
+#            ./mirage_darwin_amd64.zip
           body_path: ${{ github.workspace }}-CHANGELOG.txt
 
       - name: Login to DockerHub

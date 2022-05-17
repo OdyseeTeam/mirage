@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/OdyseeTeam/mirage/metadata"
 	"github.com/OdyseeTeam/mirage/optimizer"
 
 	"github.com/OdyseeTeam/gody-cdn/store"
@@ -16,17 +17,19 @@ import (
 
 // Server is an instance of a peer server that houses the listener and store.
 type Server struct {
-	grp       *stop.Group
-	optimizer *optimizer.Optimizer
-	cache     store.ObjectStore
+	grp             *stop.Group
+	optimizer       *optimizer.Optimizer
+	cache           store.ObjectStore
+	metadataManager *metadata.Manager
 }
 
 // NewServer returns an initialized Server pointer.
-func NewServer(optimizer *optimizer.Optimizer, cache store.ObjectStore) *Server {
+func NewServer(optimizer *optimizer.Optimizer, cache store.ObjectStore, metadataManager *metadata.Manager) *Server {
 	return &Server{
-		grp:       stop.New(),
-		optimizer: optimizer,
-		cache:     cache,
+		grp:             stop.New(),
+		optimizer:       optimizer,
+		cache:           cache,
+		metadataManager: metadataManager,
 	}
 }
 

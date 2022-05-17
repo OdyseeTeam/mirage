@@ -2,6 +2,7 @@ package http
 
 import (
 	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/OdyseeTeam/mirage/downloader"
+	"github.com/OdyseeTeam/mirage/metadata"
 
 	"github.com/OdyseeTeam/gody-cdn/store"
 	"github.com/gin-gonic/gin"
@@ -59,10 +61,8 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		UrlToProxy: urlToProxy,
 	}
 	type OptimizedImage struct {
-		optimizedImage   []byte
-		originalMimeType string
-		originalSize     int
-		optimizedSize    int
+		optimizedImage *[]byte
+		metadata       *metadata.ImageMetadata
 	}
 
 	key := fmt.Sprintf("%s-%d-%d-%d", urlToProxy, width, height, quality)
@@ -72,11 +72,23 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		hashedName := hex.EncodeToString(h.Sum(nil))
 		obj, _, err := s.cache.Get(hashedName, nil)
 		if err == nil {
+			md, err := s.metadataManager.Retrieve(hashedName)
+			if md == nil {
+				if err != nil {
+					logrus.Errorf("cannot retrieve metadata: %s", errors.FullTrace(err))
+				}
+				md = &metadata.ImageMetadata{
+					OriginalURL:      urlToProxy,
+					GodycdnHash:      hashedName,
+					Checksum:         fmt.Sprintf("%x", sha256.Sum256(obj)),
+					OriginalMimeType: "unknown",
+					OriginalSize:     0,
+					OptimizedSize:    len(obj),
+				}
+			}
 			return OptimizedImage{
-				optimizedImage:   obj,
-				originalMimeType: "unknown",
-				originalSize:     0,
-				optimizedSize:    len(obj),
+				optimizedImage: &obj,
+				metadata:       md,
 			}, nil
 		}
 		if err != nil && !strings.Contains(err.Error(), store.ErrObjectNotFound.Error()) {
@@ -95,11 +107,21 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		if err != nil {
 			logrus.Errorf("error storing %s: %s", key, errors.FullTrace(err))
 		}
+		md := &metadata.ImageMetadata{
+			OriginalURL:      urlToProxy,
+			GodycdnHash:      hashedName,
+			Checksum:         fmt.Sprintf("%x", sha256.Sum256(optimized)),
+			OriginalMimeType: origMime,
+			OriginalSize:     len(image),
+			OptimizedSize:    len(optimized),
+		}
+		err = s.metadataManager.Persist(md)
+		if err != nil {
+			logrus.Errorf("failed to persiste metadata for object %s: %s", urlToProxy, errors.FullTrace(err))
+		}
 		return OptimizedImage{
-			optimizedImage:   optimized,
-			originalMimeType: origMime,
-			originalSize:     len(image),
-			optimizedSize:    len(optimized),
+			optimizedImage: &optimized,
+			metadata:       md,
 		}, nil
 	})
 	if err != nil {
@@ -112,11 +134,11 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		return
 	}
 
-	c.Header("Content-Length", fmt.Sprintf("%d", optimizedData.optimizedSize))
-	c.Header("X-mirage-saved-bytes", fmt.Sprintf("%d", optimizedData.originalSize-optimizedData.optimizedSize))
-	c.Header("X-mirage-compression-ratio", fmt.Sprintf("%.2f:1", float64(optimizedData.originalSize)/float64(optimizedData.optimizedSize)))
-	c.Header("X-mirage-original-mime", optimizedData.originalMimeType)
-	c.Data(200, "image/webp", optimizedData.optimizedImage)
+	c.Header("Content-Length", fmt.Sprintf("%d", optimizedData.metadata.OptimizedSize))
+	c.Header("X-mirage-saved-bytes", fmt.Sprintf("%d", optimizedData.metadata.OriginalSize-optimizedData.metadata.OptimizedSize))
+	c.Header("X-mirage-compression-ratio", fmt.Sprintf("%.2f:1", float64(optimizedData.metadata.OriginalSize)/float64(optimizedData.metadata.OptimizedSize)))
+	c.Header("X-mirage-original-mime", optimizedData.metadata.OriginalMimeType)
+	c.Data(200, "image/webp", *optimizedData.optimizedImage)
 	logrus.Infof("%v", oP)
 }
 
