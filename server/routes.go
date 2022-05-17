@@ -71,12 +71,7 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		queryString = uriSplit[1]
 	}
 	urlToProxy += queryString
-	var oP = optimizerParams{
-		Width:      width,
-		Height:     height,
-		Quality:    quality,
-		UrlToProxy: urlToProxy,
-	}
+
 	type OptimizedImage struct {
 		optimizedImage *[]byte
 		metadata       *metadata.ImageMetadata
@@ -157,7 +152,6 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 	c.Header("X-mirage-original-mime", optimizedData.metadata.OriginalMimeType)
 	c.Header("Cache-control", "max-age=604800")
 	c.Data(200, "image/webp", *optimizedData.optimizedImage)
-	logrus.Infof("%v", oP)
 }
 
 func (s *Server) recoveryHandler(c *gin.Context, err interface{}) {

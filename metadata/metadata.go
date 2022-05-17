@@ -62,10 +62,11 @@ type ImageMetadata struct {
 
 func (m *Manager) Persist(md *ImageMetadata) error {
 	query := "INSERT IGNORE INTO mirage.metadata (original_url, godycdn_hash, checksum, original_size, otpimized_size, original_mime) VALUES (?,?,?,?,?,?)"
-	_, err := m.dbConn.Query(query, md.OriginalURL, md.GodycdnHash, md.Checksum, md.OriginalSize, md.OptimizedSize, md.OriginalMimeType)
+	r, err := m.dbConn.Query(query, md.OriginalURL, md.GodycdnHash, md.Checksum, md.OriginalSize, md.OptimizedSize, md.OriginalMimeType)
 	if err != nil {
 		return errors.Err(err)
 	}
+	_ = r.Close()
 	err = m.cache.Set(md.GodycdnHash, *md)
 	if err != nil {
 		return errors.Err(err)
