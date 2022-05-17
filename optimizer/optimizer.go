@@ -11,6 +11,7 @@ import (
 
 	"github.com/chai2010/webp"
 	"github.com/lbryio/lbry.go/v2/extras/errors"
+	"github.com/nfnt/resize"
 	log "github.com/sirupsen/logrus"
 	giftowebp "github.com/sizeofint/gif-to-webp"
 	"golang.org/x/image/bmp"
@@ -23,7 +24,7 @@ func NewOptimizer() *Optimizer {
 	return &Optimizer{}
 }
 
-func (o *Optimizer) Optimize(data []byte, quality int64) (optimized []byte, originalContentType string, err error) {
+func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimized []byte, originalContentType string, err error) {
 	var buf bytes.Buffer
 	contentType := http.DetectContentType(data)
 	if strings.Contains(contentType, "gif") {
@@ -36,11 +37,22 @@ func (o *Optimizer) Optimize(data []byte, quality int64) (optimized []byte, orig
 			return nil, contentType, errors.Err(err)
 		}
 		return webpBin, contentType, nil
+	} else if strings.Contains(contentType, "webp") {
+		img, err := readRawImage(data, contentType, 16383*16383)
+		if err != nil {
+			return nil, contentType, err
+		}
+		img = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
+		err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
+		if err != nil {
+			return nil, contentType, errors.Err(err)
+		}
 	} else {
 		img, err := readRawImage(data, contentType, 16383*16383)
 		if err != nil {
 			return nil, contentType, err
 		}
+		img = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
 		err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
 		if err != nil {
 			return nil, contentType, errors.Err(err)

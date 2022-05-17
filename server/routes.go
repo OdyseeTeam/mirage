@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -28,6 +29,16 @@ type optimizerParams struct {
 
 var sf = singleflight.Group{}
 
+func (s *Server) simpleRedirect(c *gin.Context) {
+	urlToProxy := strings.TrimPrefix(c.Param("url"), "/")
+	uriSplit := strings.Split(c.Request.RequestURI, urlToProxy)
+	queryString := ""
+	if len(uriSplit) > 1 {
+		queryString = uriSplit[1]
+	}
+	urlToProxy += queryString
+	c.Redirect(http.StatusTemporaryRedirect, "/optimize/s:0:0/quality:85/plain/"+url.QueryEscape(urlToProxy))
+}
 func (s *Server) optimizeHandler(c *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -54,6 +65,12 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		return
 	}
 	urlToProxy := strings.TrimPrefix(c.Param("url"), "/")
+	uriSplit := strings.Split(c.Request.RequestURI, urlToProxy)
+	queryString := ""
+	if len(uriSplit) > 1 {
+		queryString = uriSplit[1]
+	}
+	urlToProxy += queryString
 	var oP = optimizerParams{
 		Width:      width,
 		Height:     height,
@@ -98,7 +115,7 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		if err != nil {
 			return nil, err
 		}
-		optimized, origMime, err := s.optimizer.Optimize(image, quality)
+		optimized, origMime, err := s.optimizer.Optimize(image, quality, width, height)
 		if err != nil {
 			logrus.Errorf("failed to optimize resource with content type: %s", origMime)
 			return nil, err
@@ -138,6 +155,7 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 	c.Header("X-mirage-saved-bytes", fmt.Sprintf("%d", optimizedData.metadata.OriginalSize-optimizedData.metadata.OptimizedSize))
 	c.Header("X-mirage-compression-ratio", fmt.Sprintf("%.2f:1", float64(optimizedData.metadata.OriginalSize)/float64(optimizedData.metadata.OptimizedSize)))
 	c.Header("X-mirage-original-mime", optimizedData.metadata.OriginalMimeType)
+	c.Header("Cache-control", "max-age=604800")
 	c.Data(200, "image/webp", *optimizedData.optimizedImage)
 	logrus.Infof("%v", oP)
 }
@@ -158,6 +176,7 @@ func (s *Server) ErrorHandle() gin.HandlerFunc {
 		}
 		logrus.Errorln(errors.FullTrace(err))
 		c.String(-1, err.Error())
+		c.Header("Cache-control", "max-age=240")
 		return
 	}
 }

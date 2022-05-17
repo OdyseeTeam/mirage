@@ -1,6 +1,6 @@
 version: "3.2"
 # you may need to run
-# mkdir database && sudo chmod 1001:10001 -R ./database
+# mkdir -p database/mysql && sudo chown 1001:10001 -R ./database
 # before starting up the container the first time
 services:
   mysql:
@@ -11,7 +11,7 @@ services:
     volumes:
       - ./database/mysql:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-#      - ./my.cnf:/etc/mysql/my.cnf
+#     - ./my.cnf:/etc/mysql/my.cnf
     environment:
       - MYSQL_USER=mirage
       - MYSQL_PASSWORD=mirage
@@ -35,7 +35,7 @@ services:
       - "./objects_cache:/tmp/objects"
       - "./config.json:/app/config.json"
     entrypoint: >
-      ./mirage serve
+      /app/dist/linux_amd64/mirage serve
     depends_on:
       - mysql
   watchtower:

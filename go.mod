@@ -12,6 +12,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/johntdyer/slackrus v0.0.0-20211215141436-33e4a270affb
 	github.com/lbryio/lbry.go/v2 v2.7.2-0.20220504162735-e5ab0f883edf
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/sirupsen/logrus v1.8.1
 	github.com/sizeofint/gif-to-webp v0.0.0-20210224202734-e9d7ed071591
 	github.com/spf13/cobra v1.4.0

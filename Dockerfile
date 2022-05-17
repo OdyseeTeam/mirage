@@ -5,6 +5,6 @@ COPY . /app/
 
 RUN make linux
 
-EXPOSE 8080
+EXPOSE 6456
 
 CMD ["/app/dist/linux_amd64/mirage","serve"]
