@@ -38,15 +38,17 @@ func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimiz
 		}
 		return webpBin, contentType, nil
 	} else if strings.Contains(contentType, "webp") {
-		img, err := readRawImage(data, contentType, 16383*16383)
-		if err != nil {
-			return nil, contentType, err
-		}
-		img = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
-		err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
-		if err != nil {
-			return nil, contentType, errors.Err(err)
-		}
+		//explore https://github.com/h2non/bimg https://github.com/discord/lilliput
+		//img, err := readRawImage(data, contentType, 16383*16383)
+		//if err != nil {
+		//	return nil, contentType, err
+		//}
+		//img = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
+		//err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
+		//if err != nil {
+		//	return nil, contentType, errors.Err(err)
+		//}
+		return data, contentType, nil
 	} else {
 		img, err := readRawImage(data, contentType, 16383*16383)
 		if err != nil {
@@ -68,6 +70,8 @@ func readRawImage(data []byte, contentType string, maxPixel int) (img image.Imag
 		img, err = png.Decode(bytes.NewReader(data))
 	} else if strings.Contains(contentType, "bmp") {
 		img, err = bmp.Decode(bytes.NewReader(data))
+	} else if strings.Contains(contentType, "webp") {
+		img, err = webp.Decode(bytes.NewReader(data))
 	} else {
 		return nil, errors.Err("%s type is not supported", contentType)
 	}
