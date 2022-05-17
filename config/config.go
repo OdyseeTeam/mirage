@@ -2,14 +2,22 @@ package config
 
 import (
 	"github.com/johntdyer/slackrus"
+	"github.com/lbryio/lbry.go/v2/extras/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 var Debugging bool
 
-// InitializeConfiguration inits the base configuration of commentron
+// InitializeConfiguration inits the base configuration
 func InitializeConfiguration() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
+	viper.AddConfigPath("./")
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {             // Handle errors reading the config file
+		logrus.Fatalf("Fatal error config file: %s", errors.FullTrace(errors.Err(err)))
+	}
 	if viper.GetBool("debugmode") {
 		Debugging = true
 		logrus.SetLevel(logrus.DebugLevel)

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/OdyseeTeam/mirage/internal/version"
+
 	"github.com/spf13/cobra"
 )
 
