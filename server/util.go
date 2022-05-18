@@ -63,8 +63,21 @@ func handleExceptions(c *gin.Context, width int64, height int64, quality int64) 
 		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
 		return true
 	}
+	recursionUrlToProxy := strings.TrimPrefix(c.Param("url"), "/")
+	hasRecursion := strings.Contains(recursionUrlToProxy, "https://thumbnails.odycdn.com")
+	if hasRecursion {
+		cutIndex := strings.LastIndex(recursionUrlToProxy, "plain/") + 6
+		if cutIndex > 6 {
+			urlToProxy = recursionUrlToProxy[cutIndex:len(recursionUrlToProxy)]
+			c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
+			return true
+		}
+		_ = c.AbortWithError(http.StatusBadRequest, errors.Err("malformed recursive URL"))
+		return true
+	}
 	return false
 }
+
 func extractUrl(c *gin.Context) string {
 	urlToProxy := strings.TrimPrefix(c.Param("url"), "/")
 	uriSplit := strings.Split(c.Request.RequestURI, urlToProxy)
