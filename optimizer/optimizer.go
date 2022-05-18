@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/OdyseeTeam/mirage/internal/metrics"
 	"github.com/chai2010/webp"
 	"github.com/lbryio/lbry.go/v2/extras/errors"
 	"github.com/nfnt/resize"
@@ -25,6 +26,8 @@ func NewOptimizer() *Optimizer {
 }
 
 func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimized []byte, originalContentType string, err error) {
+	metrics.OptimizersRunning.Inc()
+	defer metrics.OptimizersRunning.Dec()
 	var buf bytes.Buffer
 	contentType := http.DetectContentType(data)
 	if strings.Contains(contentType, "gif") {

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/OdyseeTeam/mirage/internal/metrics"
 	"github.com/OdyseeTeam/mirage/metadata"
 	"github.com/OdyseeTeam/mirage/optimizer"
 
@@ -48,6 +49,7 @@ func (s *Server) Start(address string) error {
 	router.Use(s.ErrorHandle())
 	router.Use(nice.Recovery(s.recoveryHandler))
 	router.Use(s.addCSPHeaders)
+	metrics.InstallRoute(router)
 	//https://thumbnails.odycdn.com/optimize/s:100:0/quality:85/plain/https://thumbnails.lbry.com/UCX_t3BvnQtS5IHzto_y7tbw
 	router.GET("/optimize/:dimensions/quality:quality/plain/*url", s.optimizeHandler)
 	router.GET("/optimize/plain/*url", s.simpleRedirect)
