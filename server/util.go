@@ -41,28 +41,29 @@ func getDimensions(c *gin.Context) (width int64, height int64, err error) {
 	return width, height, nil
 }
 
-func handleExceptions(c *gin.Context, width int64, height int64, quality int64) {
+func handleExceptions(c *gin.Context, width int64, height int64, quality int64) (redirected bool) {
 	urlToProxy := extractUrl(c)
 	malformedSpeechUrl := strings.Index(urlToProxy, "https://spee.ch/") == 0
 	if malformedSpeechUrl {
 		urlToProxy = strings.TrimPrefix(urlToProxy, "https://spee.ch/")
 		if parts := regexp.MustCompile(`^(view/)?([a-f0-9]+)/(.*?)\.(.*)$`).FindStringSubmatch(urlToProxy); parts != nil {
 			c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(fmt.Sprintf("https://player.odycdn.com/speech/%s:%s.%s", parts[3], parts[2], parts[4]))))
-			return
+			return true
 		}
 	}
 	atWebp := strings.HasSuffix(urlToProxy, "@webp")
 	if atWebp {
 		urlToProxy = strings.TrimSuffix(urlToProxy, "@webp")
 		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
-		return
+		return true
 	}
 	oldSpeechBug := strings.HasSuffix(urlToProxy, "..jpeg")
 	if oldSpeechBug {
 		urlToProxy = strings.TrimSuffix(urlToProxy, "..jpeg")
 		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
-		return
+		return true
 	}
+	return false
 }
 func extractUrl(c *gin.Context) string {
 	urlToProxy := strings.TrimPrefix(c.Param("url"), "/")

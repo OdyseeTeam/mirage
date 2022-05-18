@@ -61,7 +61,9 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	handleExceptions(c, width, height, quality)
+	if handleExceptions(c, width, height, quality) {
+		return
+	}
 
 	urlToProxy := extractUrl(c)
 	key := fmt.Sprintf("%s-%d-%d-%d", urlToProxy, width, height, quality)
