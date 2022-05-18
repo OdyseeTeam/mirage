@@ -8,13 +8,14 @@ require (
 	github.com/bluele/gcache v0.0.2
 	github.com/chai2010/webp v1.1.1
 	github.com/ekyoung/gin-nice-recovery v0.0.0-20160510022553-1654dca486db
+	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
-	github.com/h2non/go-is-svg v0.0.0-20160927212452-35e8c4b0612c
 	github.com/johntdyer/slackrus v0.0.0-20211215141436-33e4a270affb
 	github.com/lbryio/lbry.go/v2 v2.7.2-0.20220504162735-e5ab0f883edf
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/oov/psd v0.0.0-20220121172623-5db5eafcecbb
 	github.com/prometheus/client_golang v1.12.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/sizeofint/gif-to-webp v0.0.0-20210224202734-e9d7ed071591
@@ -37,6 +38,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/gopherjs/gopherjs v0.0.0-20190915194858-d3ddacdb130f // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -65,6 +67,7 @@ require (
 	github.com/tkanos/gonfig v0.0.0-20210106201359-53e13348de2f // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
+	golang.org/x/net v0.0.0-20220421235706-1d1ef9303861 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/text v0.3.7 // indirect

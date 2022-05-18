@@ -6,14 +6,14 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
-	"net/http"
 	"strings"
 
 	"github.com/OdyseeTeam/mirage/internal/metrics"
 	"github.com/chai2010/webp"
-	svg "github.com/h2non/go-is-svg"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/lbryio/lbry.go/v2/extras/errors"
 	"github.com/nfnt/resize"
+	_ "github.com/oov/psd"
 	log "github.com/sirupsen/logrus"
 	giftowebp "github.com/sizeofint/gif-to-webp"
 	"golang.org/x/image/bmp"
@@ -30,7 +30,7 @@ func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimiz
 	metrics.OptimizersRunning.Inc()
 	defer metrics.OptimizersRunning.Dec()
 	var buf bytes.Buffer
-	contentType := http.DetectContentType(data)
+	contentType := mimetype.Detect(data).String() //http.DetectContentType(data)
 	if strings.Contains(contentType, "gif") {
 		converter := giftowebp.NewConverter()
 		converter.LoopCompatibility = false
@@ -43,18 +43,8 @@ func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimiz
 		return webpBin, contentType, nil
 	} else if strings.Contains(contentType, "webp") {
 		//explore https://github.com/h2non/bimg https://github.com/discord/lilliput
-		//img, err := readRawImage(data, contentType, 16383*16383)
-		//if err != nil {
-		//	return nil, contentType, err
-		//}
-		//img = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
-		//err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
-		//if err != nil {
-		//	return nil, contentType, errors.Err(err)
-		//}
 		return data, contentType, nil
-	} else if strings.Contains(contentType, "text/xml") && svg.Is(data) {
-		contentType = "image/svg+xml"
+	} else if strings.Contains(contentType, "svg") {
 		return data, contentType, nil
 	} else {
 		img, err := readRawImage(data, contentType, 16383*16383)
@@ -79,6 +69,8 @@ func readRawImage(data []byte, contentType string, maxPixel int) (img image.Imag
 		img, err = bmp.Decode(bytes.NewReader(data))
 	} else if strings.Contains(contentType, "webp") {
 		img, err = webp.Decode(bytes.NewReader(data))
+	} else if strings.Contains(contentType, "image/vnd.adobe.photoshop") {
+		img, _, err = image.Decode(bytes.NewReader(data))
 	} else {
 		return nil, errors.Err("%s type is not supported", contentType)
 	}
