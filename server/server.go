@@ -49,7 +49,7 @@ func (s *Server) Start(address string) error {
 	//gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(gin.Logger())
-	router.Use(s.ErrorHandle())
+	router.Use(s.ErrorHandle)
 	router.Use(nice.Recovery(s.recoveryHandler))
 	router.Use(s.addCSPHeaders)
 	metrics.InstallRoute(router)

@@ -31,7 +31,7 @@ var sf = singleflight.Group{}
 
 func (s *Server) simpleRedirect(c *gin.Context) {
 	urlToProxy := extractUrl(c)
-	c.Redirect(http.StatusTemporaryRedirect, "/optimize/s:0:0/quality:85/plain/"+url.QueryEscape(urlToProxy))
+	c.Redirect(http.StatusPermanentRedirect, "/optimize/s:0:0/quality:85/plain/"+url.QueryEscape(urlToProxy))
 }
 
 func (s *Server) noQualityRedirect(c *gin.Context) {
@@ -42,7 +42,7 @@ func (s *Server) noQualityRedirect(c *gin.Context) {
 	}
 	urlToProxy := extractUrl(c)
 
-	c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:85/plain/%s", width, height, url.QueryEscape(urlToProxy)))
+	c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:85/plain/%s", width, height, url.QueryEscape(urlToProxy)))
 }
 
 type optimizedImage struct {
@@ -111,18 +111,14 @@ func (s *Server) recoveryHandler(c *gin.Context, err interface{}) {
 	})
 }
 
-func (s *Server) ErrorHandle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-		err := c.Errors.Last()
-		if err == nil {
-			return
-		}
-		logrus.Errorln(errors.FullTrace(err))
-		c.String(-1, err.Error())
-		c.Header("Cache-control", "max-age=240")
+func (s *Server) ErrorHandle(c *gin.Context) {
+	c.Next()
+	err := c.Errors.Last()
+	if err == nil {
 		return
 	}
+	logrus.Errorln(errors.FullTrace(err))
+	c.String(-1, err.Error())
 }
 
 func (s *Server) addCSPHeaders(c *gin.Context) {
