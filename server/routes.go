@@ -87,18 +87,28 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 			return
 		}
 	}
-	metrics.RequestCount.Inc()
 
 	key := fmt.Sprintf("%s-%d-%d-%d", urlToProxy, width, height, quality)
+	cachedErr, err := s.errorCache.Get(key)
+	if err == nil && cachedErr != nil {
+		val, ok := cachedErr.(error)
+		if ok {
+			_ = c.AbortWithError(http.StatusBadRequest, val)
+			return
+		}
+	}
+	metrics.RequestCount.Inc()
 	v, err := sf.Do(key, func() (interface{}, error) {
 		return s.downloadAndOptimize(key, urlToProxy, quality, width, height)
 	})
 	if err != nil {
+		_ = s.errorCache.Set(key, err)
 		_ = c.AbortWithError(http.StatusBadRequest, errors.Err(err))
 		return
 	}
 	optimizedDataPtr, ok := v.(*optimizedImage)
 	if !ok {
+		_ = s.errorCache.Set(key, err)
 		_ = c.AbortWithError(http.StatusInternalServerError, errors.Err("could not cast from sf cache"))
 		return
 	}

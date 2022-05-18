@@ -8,6 +8,7 @@ import (
 	"github.com/OdyseeTeam/mirage/internal/metrics"
 	"github.com/OdyseeTeam/mirage/metadata"
 	"github.com/OdyseeTeam/mirage/optimizer"
+	"github.com/bluele/gcache"
 
 	"github.com/OdyseeTeam/gody-cdn/store"
 	nice "github.com/ekyoung/gin-nice-recovery"
@@ -22,6 +23,7 @@ type Server struct {
 	optimizer       *optimizer.Optimizer
 	cache           store.ObjectStore
 	metadataManager *metadata.Manager
+	errorCache      gcache.Cache
 }
 
 // NewServer returns an initialized Server pointer.
@@ -31,6 +33,7 @@ func NewServer(optimizer *optimizer.Optimizer, cache store.ObjectStore, metadata
 		optimizer:       optimizer,
 		cache:           cache,
 		metadataManager: metadataManager,
+		errorCache:      gcache.New(10000).Expiration(2 * time.Minute).Build(),
 	}
 }
 
