@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/OdyseeTeam/mirage/downloader"
@@ -32,14 +30,19 @@ type optimizerParams struct {
 var sf = singleflight.Group{}
 
 func (s *Server) simpleRedirect(c *gin.Context) {
-	urlToProxy := strings.TrimPrefix(c.Param("url"), "/")
-	uriSplit := strings.Split(c.Request.RequestURI, urlToProxy)
-	queryString := ""
-	if len(uriSplit) > 1 {
-		queryString = uriSplit[1]
-	}
-	urlToProxy += queryString
+	urlToProxy := extractUrl(c)
 	c.Redirect(http.StatusTemporaryRedirect, "/optimize/s:0:0/quality:85/plain/"+url.QueryEscape(urlToProxy))
+}
+
+func (s *Server) noQualityRedirect(c *gin.Context) {
+	width, height, err := getDimensions(c)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	urlToProxy := extractUrl(c)
+
+	c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:85/plain/%s", width, height, url.QueryEscape(urlToProxy)))
 }
 
 type optimizedImage struct {
@@ -53,42 +56,16 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 			logrus.Errorf("Recovered from panic: %v", r)
 		}
 	}()
-	dimensions := strings.Split(c.Param("dimensions"), ":")
-	if len(dimensions) != 3 {
-		_ = c.AbortWithError(http.StatusBadRequest, errors.Err("dimensions should be in the form of /s:width:height/"))
-	}
-	width, err := strconv.ParseInt(dimensions[1], 10, 32)
+	width, height, quality, err := getOptimizationParams(c)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, errors.Err(err))
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	height, err := strconv.ParseInt(dimensions[2], 10, 32)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, errors.Err(err))
-		return
-	}
-	quality, err := strconv.ParseInt(strings.TrimPrefix(c.Param("quality"), ":"), 10, 32)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, errors.Err(err))
-		return
-	}
-	urlToProxy := strings.TrimPrefix(c.Param("url"), "/")
-	uriSplit := strings.Split(c.Request.RequestURI, urlToProxy)
-	queryString := ""
-	if len(uriSplit) > 1 {
-		queryString = uriSplit[1]
-	}
-	urlToProxy += queryString
-	malformedSpeechUrl := strings.Index(urlToProxy, "https://spee.ch/") == 0
-	if malformedSpeechUrl {
-		urlToProxy = strings.TrimPrefix(urlToProxy, "https://spee.ch/")
-		if parts := regexp.MustCompile(`^(view/)?([a-f0-9]+)/(.*?)\.(.*)$`).FindStringSubmatch(urlToProxy); parts != nil {
-			c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(fmt.Sprintf("https://player.odycdn.com/speech/%s:%s.%s", parts[3], parts[2], parts[4]))))
-			return
-		}
-	}
+	handleExceptions(c, width, height, quality)
 
+	urlToProxy := extractUrl(c)
 	key := fmt.Sprintf("%s-%d-%d-%d", urlToProxy, width, height, quality)
+
 	cachedErr, err := s.errorCache.Get(key)
 	if err == nil && cachedErr != nil {
 		val, ok := cachedErr.(error)
