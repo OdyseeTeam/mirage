@@ -11,6 +11,7 @@ import (
 
 	"github.com/OdyseeTeam/mirage/internal/metrics"
 	"github.com/chai2010/webp"
+	svg "github.com/h2non/go-is-svg"
 	"github.com/lbryio/lbry.go/v2/extras/errors"
 	"github.com/nfnt/resize"
 	log "github.com/sirupsen/logrus"
@@ -51,6 +52,9 @@ func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimiz
 		//if err != nil {
 		//	return nil, contentType, errors.Err(err)
 		//}
+		return data, contentType, nil
+	} else if strings.Contains(contentType, "text/xml") && svg.Is(data) {
+		contentType = "image/svg+xml"
 		return data, contentType, nil
 	} else {
 		img, err := readRawImage(data, contentType, 16383*16383)

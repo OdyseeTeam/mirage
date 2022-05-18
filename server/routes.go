@@ -103,12 +103,16 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		return
 	}
 	optimizedData := *optimizedDataPtr
+	contentType := "image/webp"
+	if optimizedData.metadata.OriginalMimeType == "image/svg+xml" {
+		contentType = optimizedData.metadata.OriginalMimeType
+	}
 	c.Header("Content-Length", fmt.Sprintf("%d", optimizedData.metadata.OptimizedSize))
 	c.Header("X-mirage-saved-bytes", fmt.Sprintf("%d", optimizedData.metadata.OriginalSize-optimizedData.metadata.OptimizedSize))
 	c.Header("X-mirage-compression-ratio", fmt.Sprintf("%.2f:1", float64(optimizedData.metadata.OriginalSize)/float64(optimizedData.metadata.OptimizedSize)))
 	c.Header("X-mirage-original-mime", optimizedData.metadata.OriginalMimeType)
 	c.Header("Cache-control", "max-age=604800")
-	c.Data(200, "image/webp", *optimizedData.optimizedImage)
+	c.Data(200, contentType, *optimizedData.optimizedImage)
 }
 
 func (s *Server) recoveryHandler(c *gin.Context, err interface{}) {
