@@ -37,7 +37,12 @@ func getDimensions(c *gin.Context) (width int64, height int64, err error) {
 	if err != nil {
 		return width, 0, errors.Err(err)
 	}
-
+	//the frontend is requesting something it doesn't actually want.... this forces us to hardcode it here
+	//TODO: get rid of this and have the frontend NOT pass both params
+	//this will also mess up the caches as things will be cached with improper parameters
+	if width != 0 && height != 0 {
+		height = 0
+	}
 	return width, height, nil
 }
 
