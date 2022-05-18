@@ -48,6 +48,7 @@ func (s *Server) noQualityRedirect(c *gin.Context) {
 type optimizedImage struct {
 	optimizedImage *[]byte
 	metadata       *metadata.ImageMetadata
+	cacheHit       bool
 }
 
 func (s *Server) optimizeHandler(c *gin.Context) {
@@ -100,6 +101,7 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 	c.Header("X-mirage-saved-bytes", fmt.Sprintf("%d", optimizedData.metadata.OriginalSize-optimizedData.metadata.OptimizedSize))
 	c.Header("X-mirage-compression-ratio", fmt.Sprintf("%.2f:1", float64(optimizedData.metadata.OriginalSize)/float64(optimizedData.metadata.OptimizedSize)))
 	c.Header("X-mirage-original-mime", optimizedData.metadata.OriginalMimeType)
+	c.Header("X-mirage-cache-hit", fmt.Sprintf("%t", optimizedData.cacheHit))
 	c.Header("Cache-control", "max-age=604800")
 	c.Data(200, contentType, *optimizedData.optimizedImage)
 }
@@ -150,6 +152,7 @@ func (s *Server) downloadAndOptimize(cacheKey string, urlToProxy string, quality
 		return &optimizedImage{
 			optimizedImage: &obj,
 			metadata:       md,
+			cacheHit:       true,
 		}, nil
 	}
 	if err != nil && !strings.Contains(err.Error(), store.ErrObjectNotFound.Error()) {
@@ -183,5 +186,6 @@ func (s *Server) downloadAndOptimize(cacheKey string, urlToProxy string, quality
 	return &optimizedImage{
 		optimizedImage: &optimized,
 		metadata:       md,
+		cacheHit:       false,
 	}, nil
 }
