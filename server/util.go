@@ -62,9 +62,16 @@ func handleExceptions(c *gin.Context, width int64, height int64, quality int64) 
 		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
 		return true
 	}
-	oldSpeechBug := strings.HasSuffix(urlToProxy, "..jpeg")
+	oldSpeechBug := strings.HasSuffix(urlToProxy, "..jpeg") || strings.HasSuffix(urlToProxy, "..png")
 	if oldSpeechBug {
 		urlToProxy = strings.TrimSuffix(urlToProxy, "..jpeg")
+		urlToProxy = strings.TrimSuffix(urlToProxy, "..png")
+		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
+		return true
+	}
+	decommissionedProxy := strings.Contains(urlToProxy, "https://lbry-boost.org/redirect-event?source=")
+	if decommissionedProxy {
+		urlToProxy = strings.Replace(urlToProxy, "https://lbry-boost.org/redirect-event?source=", "", -1)
 		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
 		return true
 	}
