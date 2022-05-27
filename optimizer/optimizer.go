@@ -26,11 +26,12 @@ func NewOptimizer() *Optimizer {
 	return &Optimizer{}
 }
 
-func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimized []byte, originalContentType string, err error) {
+func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimized []byte, originalContentType, optimizedContentType string, err error) {
 	metrics.OptimizersRunning.Inc()
 	defer metrics.OptimizersRunning.Dec()
 	var buf bytes.Buffer
-	contentType := mimetype.Detect(data).String() //http.DetectContentType(data)
+	contentType := mimetype.Detect(data).String()
+	webPContentType := "image/webp"
 	if strings.Contains(contentType, "gif") {
 		converter := giftowebp.NewConverter()
 		converter.LoopCompatibility = false
@@ -38,27 +39,27 @@ func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimiz
 		converter.WebPConfig.SetMethod(4)
 		webpBin, err := converter.Convert(data)
 		if err != nil {
-			return nil, contentType, errors.Err(err)
+			return nil, contentType, "", errors.Err(err)
 		}
-		return webpBin, contentType, nil
+		return webpBin, contentType, webPContentType, nil
 	} else if strings.Contains(contentType, "webp") {
 		//explore https://github.com/h2non/bimg https://github.com/discord/lilliput
-		return data, contentType, nil
+		return data, contentType, webPContentType, nil
 	} else if strings.Contains(contentType, "svg") {
-		return data, contentType, nil
+		return data, contentType, contentType, nil
 	} else {
 		img, err := readRawImage(data, contentType, 16383*16383)
 		if err != nil {
-			return nil, contentType, err
+			return nil, contentType, "", err
 		}
 		img = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
 		err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
 		if err != nil {
-			return nil, contentType, errors.Err(err)
+			return nil, contentType, "", errors.Err(err)
 		}
 	}
 
-	return buf.Bytes(), contentType, nil
+	return buf.Bytes(), contentType, webPContentType, nil
 }
 func readRawImage(data []byte, contentType string, maxPixel int) (img image.Image, err error) {
 	if strings.Contains(contentType, "jpeg") || strings.Contains(contentType, "jpg") {

@@ -162,7 +162,7 @@ func (s *Server) downloadAndOptimize(cacheKey string, urlToProxy string, quality
 	if err != nil {
 		return nil, err
 	}
-	optimized, origMime, err := s.optimizer.Optimize(image, quality, width, height)
+	optimized, origMime, optimizedMime, err := s.optimizer.Optimize(image, quality, width, height)
 	if err != nil {
 		logrus.Errorf("failed to optimize resource with content type: %s", origMime)
 		return nil, err
@@ -172,12 +172,13 @@ func (s *Server) downloadAndOptimize(cacheKey string, urlToProxy string, quality
 		logrus.Errorf("error storing %s: %s", cacheKey, errors.FullTrace(err))
 	}
 	md := &metadata.ImageMetadata{
-		OriginalURL:      urlToProxy,
-		GodycdnHash:      hashedName,
-		Checksum:         fmt.Sprintf("%x", sha256.Sum256(optimized)),
-		OriginalMimeType: origMime,
-		OriginalSize:     len(image),
-		OptimizedSize:    len(optimized),
+		OriginalURL:       urlToProxy,
+		GodycdnHash:       hashedName,
+		Checksum:          fmt.Sprintf("%x", sha256.Sum256(optimized)),
+		OriginalMimeType:  origMime,
+		OriginalSize:      len(image),
+		OptimizedSize:     len(optimized),
+		OptimizedMimeType: optimizedMime,
 	}
 	err = s.metadataManager.Persist(md)
 	if err != nil {

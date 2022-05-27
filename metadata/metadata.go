@@ -52,12 +52,13 @@ func connect(dsn string) (*sql.DB, error) {
 }
 
 type ImageMetadata struct {
-	OriginalURL      string `json:"original_url"`
-	GodycdnHash      string `json:"godycdn_ash"`
-	Checksum         string `json:"checksum"`
-	OriginalMimeType string `json:"original_mime_type"`
-	OriginalSize     int    `json:"original_size"`
-	OptimizedSize    int    `json:"optimized_size"`
+	OriginalURL       string `json:"original_url"`
+	GodycdnHash       string `json:"godycdn_ash"`
+	Checksum          string `json:"checksum"`
+	OriginalMimeType  string `json:"original_mime_type"`
+	OriginalSize      int    `json:"original_size"`
+	OptimizedSize     int    `json:"optimized_size"`
+	OptimizedMimeType string `json:"optimized_mime_type"`
 }
 
 func (m *Manager) Persist(md *ImageMetadata) error {
