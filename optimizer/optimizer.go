@@ -52,7 +52,7 @@ func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimiz
 		if err != nil {
 			return nil, contentType, "", err
 		}
-		img = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
+		img = resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
 		err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
 		if err != nil {
 			return nil, contentType, "", errors.Err(err)
