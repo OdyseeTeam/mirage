@@ -9,6 +9,7 @@ import (
 	"github.com/OdyseeTeam/mirage/metadata"
 	"github.com/OdyseeTeam/mirage/optimizer"
 	"github.com/bluele/gcache"
+	"github.com/gin-contrib/pprof"
 
 	"github.com/OdyseeTeam/gody-cdn/store"
 	nice "github.com/ekyoung/gin-nice-recovery"
@@ -52,6 +53,7 @@ func (s *Server) Start(address string) error {
 	router.Use(s.ErrorHandle)
 	router.Use(nice.Recovery(s.recoveryHandler))
 	router.Use(s.addCSPHeaders)
+	pprof.Register(router, "dev/pprof")
 	metrics.InstallRoute(router)
 	//https://thumbnails.odycdn.com/optimize/s:100:0/quality:85/plain/https://thumbnails.lbry.com/UCX_t3BvnQtS5IHzto_y7tbw
 	router.GET("/optimize/:dimensions/quality:quality/plain/*url", s.optimizeHandler)
