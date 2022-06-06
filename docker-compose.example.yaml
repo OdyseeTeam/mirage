@@ -36,6 +36,8 @@ services:
       - "./config.json:/app/config.json"
     entrypoint: >
       /app/dist/linux_amd64/mirage serve
+    environment:
+      - SPACE_USE_DB=true
     depends_on:
       - mysql
   watchtower:

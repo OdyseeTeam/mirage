@@ -51,6 +51,38 @@ type optimizedImage struct {
 	cacheHit       bool
 }
 
+func (s *Server) pruneHandler(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			logrus.Errorf("Recovered from panic: %v", r)
+		}
+	}()
+	urlToProxy := extractUrl(c)
+
+	storedImages, err := s.metadataManager.RetrieveAllForUrl(urlToProxy)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, errors.Err("could not cast from sf cache"))
+		return
+	}
+	if len(storedImages) == 0 {
+		_ = c.AbortWithError(http.StatusNotFound, errors.Err("no cached images found for this url"))
+		return
+	}
+	for _, md := range storedImages {
+		logrus.Debugf("deleting %+v", md)
+		err = s.cache.Delete(md.GodycdnHash, nil)
+		if err != nil {
+			logrus.Errorf("could not prune image: %s", errors.FullTrace(err))
+			continue
+		}
+		err = s.metadataManager.Delete(md)
+		if err != nil {
+			logrus.Errorf("could not prune image metadata: %s", errors.FullTrace(err))
+			continue
+		}
+	}
+}
+
 func (s *Server) optimizeHandler(c *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -113,7 +145,7 @@ func (s *Server) recoveryHandler(c *gin.Context, err interface{}) {
 	})
 }
 
-func (s *Server) ErrorHandle(c *gin.Context) {
+func (s *Server) errorHandler(c *gin.Context) {
 	c.Next()
 	err := c.Errors.Last()
 	if err == nil {

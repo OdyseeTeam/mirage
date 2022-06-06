@@ -97,3 +97,38 @@ func (m *Manager) Retrieve(godyCdnHash string) (*ImageMetadata, error) {
 	}
 	return &md, nil
 }
+
+func (m *Manager) RetrieveAllForUrl(originalUrl string) ([]*ImageMetadata, error) {
+	query := "SELECT original_url, godycdn_hash, checksum, original_size, otpimized_size, original_mime FROM metadata WHERE original_url = ?"
+	rows, err := m.dbConn.Query(query, originalUrl)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, errors.Err(err)
+	}
+	defer func(rows *sql.Rows) {
+		_ = rows.Close()
+	}(rows)
+
+	mdSlice := make([]*ImageMetadata, 0, 1)
+	for rows.Next() {
+		var md ImageMetadata
+		err = rows.Scan(&md.OriginalURL, &md.GodycdnHash, &md.Checksum, &md.OriginalSize, &md.OptimizedSize, &md.OriginalMimeType)
+		if err != nil {
+			return nil, errors.Err(err)
+		}
+		mdSlice = append(mdSlice, &md)
+	}
+
+	return mdSlice, nil
+}
+func (m *Manager) Delete(md *ImageMetadata) error {
+	query := "DELETE FROM metadata WHERE godycdn_hash = ?"
+	_, err := m.dbConn.Exec(query, md.GodycdnHash)
+	if err != nil {
+		return errors.Err(err)
+	}
+	_ = m.cache.Remove(md.GodycdnHash)
+	return nil
+}

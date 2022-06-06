@@ -1,5 +1,8 @@
 {
   "debugmode": true,
+  "security": {
+    "admin_token": "mirageadmin"
+  },
   "local_db": {
     "host": "mysql",
     "user": "mirage",
