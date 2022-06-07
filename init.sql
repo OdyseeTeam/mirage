@@ -20,7 +20,7 @@ CREATE TABLE `metadata`
     `godycdn_hash`   varchar(64)  NOT NULL,
     `checksum`       varchar(64)  NOT NULL,
     `original_size`  int(11)      NOT NULL,
-    `otpimized_size` int(11)      NOT NULL,
+    `optimized_size` int(11)      NOT NULL,
     `original_mime`  varchar(100) NOT NULL,
     PRIMARY KEY (`id`),
     KEY `metadata_godycdn_hash_index` (`godycdn_hash`)

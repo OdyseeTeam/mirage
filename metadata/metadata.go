@@ -17,7 +17,7 @@ CREATE TABLE `metadata` (
   `godycdn_hash` varchar(64) NOT NULL,
   `checksum` varchar(64) NOT NULL,
   `original_size` int(11) NOT NULL,
-  `otpimized_size` int(11) NOT NULL,
+  `optimized_size` int(11) NOT NULL,
   `original_mime` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `metadata_godycdn_hash_index` (`godycdn_hash`)
@@ -62,7 +62,12 @@ type ImageMetadata struct {
 }
 
 func (m *Manager) Persist(md *ImageMetadata) error {
-	query := "INSERT IGNORE INTO mirage.metadata (original_url, godycdn_hash, checksum, original_size, otpimized_size, original_mime) VALUES (?,?,?,?,?,?)"
+	query := `INSERT INTO mirage.metadata (original_url, godycdn_hash, checksum, original_size, optimized_size, original_mime) VALUES (?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE original_url=values(original_url),
+                        original_size=values(original_size),
+                        checksum=values(checksum),
+                        optimized_size=values(optimized_size),
+                        original_mime=values(original_mime)`
 	r, err := m.dbConn.Query(query, md.OriginalURL, md.GodycdnHash, md.Checksum, md.OriginalSize, md.OptimizedSize, md.OriginalMimeType)
 	if err != nil {
 		return errors.Err(err)
@@ -81,7 +86,7 @@ func (m *Manager) Retrieve(godyCdnHash string) (*ImageMetadata, error) {
 		md := cached.(ImageMetadata)
 		return &md, nil
 	}
-	query := "SELECT original_url, godycdn_hash, checksum, original_size, otpimized_size, original_mime FROM metadata WHERE godycdn_hash = ?"
+	query := "SELECT original_url, godycdn_hash, checksum, original_size, optimized_size, original_mime FROM metadata WHERE godycdn_hash = ?"
 	row := m.dbConn.QueryRow(query, godyCdnHash)
 	var md ImageMetadata
 	err = row.Scan(&md.OriginalURL, &md.GodycdnHash, &md.Checksum, &md.OriginalSize, &md.OptimizedSize, &md.OriginalMimeType)
@@ -99,7 +104,7 @@ func (m *Manager) Retrieve(godyCdnHash string) (*ImageMetadata, error) {
 }
 
 func (m *Manager) RetrieveAllForUrl(originalUrl string) ([]*ImageMetadata, error) {
-	query := "SELECT original_url, godycdn_hash, checksum, original_size, otpimized_size, original_mime FROM metadata WHERE original_url = ?"
+	query := "SELECT original_url, godycdn_hash, checksum, original_size, optimized_size, original_mime FROM metadata WHERE original_url = ?"
 	rows, err := m.dbConn.Query(query, originalUrl)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

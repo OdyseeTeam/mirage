@@ -134,6 +134,7 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 	c.Header("X-mirage-compression-ratio", fmt.Sprintf("%.2f:1", float64(optimizedData.metadata.OriginalSize)/float64(optimizedData.metadata.OptimizedSize)))
 	c.Header("X-mirage-original-mime", optimizedData.metadata.OriginalMimeType)
 	c.Header("X-mirage-cache-hit", fmt.Sprintf("%t", optimizedData.cacheHit))
+	c.Header("X-mirage-godycdn-hash", optimizedData.metadata.GodycdnHash)
 	c.Header("Cache-control", "max-age=31536000")
 	c.Data(200, contentType, *optimizedData.optimizedImage)
 }
@@ -190,7 +191,7 @@ func (s *Server) downloadAndOptimize(cacheKey string, urlToProxy string, quality
 	if err != nil && !strings.Contains(err.Error(), store.ErrObjectNotFound.Error()) {
 		return nil, err
 	}
-	image, err := downloader.DownloadFile(urlToProxy)
+	image, err := downloader.DownloadFile(urlToProxy, false)
 	if err != nil {
 		return nil, err
 	}
