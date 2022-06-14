@@ -77,7 +77,6 @@ func readRawImage(data []byte, contentType string, maxPixel int) (img image.Imag
 	}
 	if err != nil || img == nil {
 		errInfo := fmt.Sprintf("image file is corrupted: %v", err)
-		log.Errorln(errInfo)
 		return nil, errors.Err(errInfo)
 	}
 
