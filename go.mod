@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Depado/ginprom v1.7.4
-	github.com/OdyseeTeam/gody-cdn v1.0.3
+	github.com/OdyseeTeam/gody-cdn v1.0.4
 	github.com/bluele/gcache v0.0.2
 	github.com/chai2010/webp v1.1.1
 	github.com/ekyoung/gin-nice-recovery v0.0.0-20160510022553-1654dca486db

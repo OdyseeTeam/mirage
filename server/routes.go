@@ -129,7 +129,7 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 	if optimizedData.metadata.OriginalMimeType == "image/svg+xml" {
 		contentType = optimizedData.metadata.OriginalMimeType
 	}
-	c.Header("Content-Length", fmt.Sprintf("%d", optimizedData.metadata.OptimizedSize))
+	c.Header("Content-Length", fmt.Sprintf("%d", len(*optimizedData.optimizedImage)))
 	c.Header("X-mirage-saved-bytes", fmt.Sprintf("%d", optimizedData.metadata.OriginalSize-optimizedData.metadata.OptimizedSize))
 	c.Header("X-mirage-compression-ratio", fmt.Sprintf("%.2f:1", float64(optimizedData.metadata.OriginalSize)/float64(optimizedData.metadata.OptimizedSize)))
 	c.Header("X-mirage-original-mime", optimizedData.metadata.OriginalMimeType)
