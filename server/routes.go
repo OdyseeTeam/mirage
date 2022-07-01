@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/OdyseeTeam/mirage/downloader"
@@ -94,12 +95,25 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	if handleExceptions(c, width, height, quality) {
+	useJpeg := false
+	re, err := regexp.Compile("^/optimize/")
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
+	}
+	if re.MatchString(c.Request.URL.Path) {
+		if handleExceptions(c, width, height, quality, "/optimize/s:%d:%d/quality:%d/plain/%s") {
+			return
+		}
+	} else {
+		if handleExceptions(c, width, height, quality, "/card/s:%d:%d/quality:%d/plain/%s") {
+			return
+		}
+		useJpeg = true
 	}
 
 	urlToProxy := extractUrl(c)
-	key := fmt.Sprintf("%s-%d-%d-%d", urlToProxy, width, height, quality)
+	key := fmt.Sprintf("%s-%d-%d-%d-%t", urlToProxy, width, height, quality, useJpeg)
 
 	cachedErr, err := s.errorCache.Get(key)
 	if err == nil && cachedErr != nil {
@@ -128,6 +142,20 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 	contentType := "image/webp"
 	if optimizedData.metadata.OriginalMimeType == "image/svg+xml" {
 		contentType = optimizedData.metadata.OriginalMimeType
+	}
+	if useJpeg {
+		optimized, origMime, optimizedMime, err := s.optimizer.JpegOptimize(*optimizedData.optimizedImage, quality, width, height)
+		if err != nil {
+			_ = s.errorCache.Set(key, err)
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			logrus.Errorf("failed to optimize resource with content type: %s", origMime)
+			return
+		}
+		c.Header("Content-Length", fmt.Sprintf("%d", len(optimized)))
+		c.Header("X-mirage-original-mime", origMime)
+		c.Header("Cache-control", "max-age=31536000")
+		c.Data(200, optimizedMime, optimized)
+		return
 	}
 	c.Header("Content-Length", fmt.Sprintf("%d", len(*optimizedData.optimizedImage)))
 	c.Header("X-mirage-saved-bytes", fmt.Sprintf("%d", optimizedData.metadata.OriginalSize-optimizedData.metadata.OptimizedSize))

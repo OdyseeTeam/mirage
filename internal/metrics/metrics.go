@@ -39,4 +39,16 @@ var (
 		Name:      "requests_cached",
 		Help:      "Total number of requested images found in cache",
 	})
+	OptimizedImages = promauto.NewCounter(prometheus.CounterOpts{
+		Namespace: ns,
+		Subsystem: "optimizer",
+		Name:      "webp_total",
+		Help:      "Total number of webp optimized images",
+	})
+	JpegOptimizedImages = promauto.NewCounter(prometheus.CounterOpts{
+		Namespace: ns,
+		Subsystem: "optimizer",
+		Name:      "jpeg_total",
+		Help:      "Total number of jpeg optimized images",
+	})
 )

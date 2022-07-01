@@ -46,33 +46,33 @@ func getDimensions(c *gin.Context) (width int64, height int64, err error) {
 	return width, height, nil
 }
 
-func handleExceptions(c *gin.Context, width int64, height int64, quality int64) (redirected bool) {
+func handleExceptions(c *gin.Context, width int64, height int64, quality int64, path string) (redirected bool) {
 	urlToProxy := extractUrl(c)
 	malformedSpeechUrl := strings.Index(urlToProxy, "https://spee.ch/") == 0
 	if malformedSpeechUrl {
 		urlToProxy = strings.TrimPrefix(urlToProxy, "https://spee.ch/")
 		if parts := regexp.MustCompile(`^(view/)?([a-f0-9]+)/(.*?)\.(.*)$`).FindStringSubmatch(urlToProxy); parts != nil {
-			c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(fmt.Sprintf("https://player.odycdn.com/speech/%s:%s.%s", parts[3], parts[2], parts[4]))))
+			c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf(path, width, height, quality, url.QueryEscape(fmt.Sprintf("https://player.odycdn.com/speech/%s:%s.%s", parts[3], parts[2], parts[4]))))
 			return true
 		}
 	}
 	atWebp := strings.HasSuffix(urlToProxy, "@webp")
 	if atWebp {
 		urlToProxy = strings.TrimSuffix(urlToProxy, "@webp")
-		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
+		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf(path, width, height, quality, url.QueryEscape(urlToProxy)))
 		return true
 	}
 	oldSpeechBug := strings.HasSuffix(urlToProxy, "..jpeg") || strings.HasSuffix(urlToProxy, "..png")
 	if oldSpeechBug {
 		urlToProxy = strings.TrimSuffix(urlToProxy, "..jpeg")
 		urlToProxy = strings.TrimSuffix(urlToProxy, "..png")
-		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
+		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf(path, width, height, quality, url.QueryEscape(urlToProxy)))
 		return true
 	}
 	decommissionedProxy := strings.Contains(urlToProxy, "https://lbry-boost.org/redirect-event?source=")
 	if decommissionedProxy {
 		urlToProxy = strings.Replace(urlToProxy, "https://lbry-boost.org/redirect-event?source=", "", -1)
-		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
+		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf(path, width, height, quality, url.QueryEscape(urlToProxy)))
 		return true
 	}
 	recursionUrlToProxy := strings.TrimPrefix(c.Param("url"), "/")
@@ -81,7 +81,7 @@ func handleExceptions(c *gin.Context, width int64, height int64, quality int64) 
 		cutIndex := strings.LastIndex(recursionUrlToProxy, "plain/") + 6
 		if cutIndex > 6 {
 			urlToProxy = recursionUrlToProxy[cutIndex:len(recursionUrlToProxy)]
-			c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/optimize/s:%d:%d/quality:%d/plain/%s", width, height, quality, url.QueryEscape(urlToProxy)))
+			c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf(path, width, height, quality, url.QueryEscape(urlToProxy)))
 			return true
 		}
 		_ = c.AbortWithError(http.StatusBadRequest, errors.Err("malformed recursive URL"))

@@ -65,8 +65,6 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Depado/ginprom v1.7.4 h1:4cV9RYKIkT28tZhBDam0p8me2RLypxS0in5Jw4zbcgg=
 github.com/Depado/ginprom v1.7.4/go.mod h1:Nq+O+mTGpOGotBcNbBqJJYnst5F/U0yP9T+wAInwYeg=
-github.com/OdyseeTeam/gody-cdn v1.0.3 h1:hVkiDu1UnPdxenl0PLdsgXIbSJJR8oAAwJLv3p0SCnU=
-github.com/OdyseeTeam/gody-cdn v1.0.3/go.mod h1:c4hzKnl6YtR2tnFFbjiL8en4gs6iUG7W4mA6SS4UU4w=
 github.com/OdyseeTeam/gody-cdn v1.0.4 h1:i6GczYr+oroEYRRXUmrr/j66t4eSgQUzK0PX/S+cZCs=
 github.com/OdyseeTeam/gody-cdn v1.0.4/go.mod h1:c4hzKnl6YtR2tnFFbjiL8en4gs6iUG7W4mA6SS4UU4w=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
@@ -335,6 +333,8 @@ github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0/go.mod h1:8NvIoxWQoOIhqOTXgf
 github.com/grpc-ecosystem/grpc-gateway v1.5.0/go.mod h1:RSKVYQBd5MCa4OVpNdGskqpgL2+G+NZTnrVHpWWfpdw=
 github.com/grpc-ecosystem/grpc-gateway v1.9.0/go.mod h1:vNeuVxBJEsws4ogUvrchl83t/GYV9WGTSLVdBhOQFDY=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
+github.com/h2non/bimg v1.1.9 h1:WH20Nxko9l/HFm4kZCA3Phbgu2cbHvYzxwxn9YROEGg=
+github.com/h2non/bimg v1.1.9/go.mod h1:R3+UiYwkK4rQl6KVFTOFJHitgLbZXBZNFh2cv3AEbp8=
 github.com/hashicorp/consul/api v1.1.0/go.mod h1:VmuI/Lkw1nC05EYQWNKwWGbkg+FbDBtguAZLlVdkD9Q=
 github.com/hashicorp/consul/api v1.12.0/go.mod h1:6pVBMo0ebnYdt2S3H87XhekM/HHrUoTD2XXb/VrZVy0=
 github.com/hashicorp/consul/sdk v0.1.1/go.mod h1:VKf9jXwCTEY1QZP2MOLRhb5i/I/ssyNV1vwHyQBF0x8=

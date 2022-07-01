@@ -57,6 +57,7 @@ func (s *Server) Start(address string) error {
 	metrics.InstallRoute(router)
 	//https://thumbnails.odycdn.com/optimize/s:100:0/quality:85/plain/https://thumbnails.lbry.com/UCX_t3BvnQtS5IHzto_y7tbw
 	router.GET("/optimize/:dimensions/quality:quality/plain/*url", s.optimizeHandler)
+	router.GET("/card/:dimensions/quality:quality/plain/*url", s.optimizeHandler)
 	router.GET("/optimize/:dimensions/plain/*url", s.noQualityRedirect)
 	router.GET("/optimize/plain/*url", s.simpleRedirect)
 	rg := router.Group("/admin", gin.BasicAuth(gin.Accounts{"admin": viper.GetString("security.admin_token")}))
