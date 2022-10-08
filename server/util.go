@@ -48,6 +48,12 @@ func getDimensions(c *gin.Context) (width int64, height int64, err error) {
 
 func handleExceptions(c *gin.Context, width int64, height int64, quality int64, path string) (redirected bool) {
 	urlToProxy := extractUrl(c)
+	imgurUrl := regexp.MustCompile(`^https?://i?\.?imgur\.com/.+?$`)
+	// temporarily disable imgur proxying because of throttling
+	if imgurUrl.MatchString(urlToProxy) {
+		c.Redirect(http.StatusTemporaryRedirect, urlToProxy)
+		return true
+	}
 	malformedSpeechUrl := strings.Index(urlToProxy, "https://spee.ch/") == 0
 	if malformedSpeechUrl {
 		urlToProxy = strings.TrimPrefix(urlToProxy, "https://spee.ch/")

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/OdyseeTeam/gody-cdn/cleanup"
 	"github.com/OdyseeTeam/gody-cdn/configs"
@@ -52,7 +53,7 @@ var serveCmd = &cobra.Command{
 			Path: viper.GetString("disk_cache.path"),
 			Size: viper.GetString("disk_cache.size"),
 		}
-		go cleanup.SelfCleanup(dbs, dbs, stopper, cacheParams)
+		go cleanup.SelfCleanup(dbs, dbs, stopper, cacheParams, 30*time.Second)
 		metadataDsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", viper.GetString("metadata_db.user"), viper.GetString("metadata_db.password"), viper.GetString("metadata_db.host"), viper.GetString("metadata_db.database"))
 		metadataManager, err := metadata.Init(metadataDsn)
 		if err != nil {

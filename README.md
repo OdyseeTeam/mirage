@@ -15,11 +15,11 @@ to be updated
 To be updated
 
 ## Building from Source
-This project requires [Go v1.17](https://golang.org/doc/install).
+This project requires [Go v1.18](https://golang.org/doc/install).
 
 On Ubuntu you can install it with `sudo snap install go --classic`.
 
-if you want a specific version of go, you can always do `sudo snap refresh go --channel=1.17/stable` for example.
+if you want a specific version of go, you can always do `sudo snap refresh go --channel=1.18/stable` for example.
 
 ```
 git clone git@github.com:OdyseeTeam/mirage.git
