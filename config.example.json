@@ -3,6 +3,7 @@
   "security": {
     "admin_token": "mirageadmin"
   },
+  "redirect_special": false,
   "local_db": {
     "host": "mysql",
     "user": "mirage",

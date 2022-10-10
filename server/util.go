@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lbryio/lbry.go/v2/extras/errors"
+	"github.com/spf13/viper"
 )
 
 func getOptimizationParams(c *gin.Context) (width int64, height int64, quality int64, err error) {
@@ -50,7 +51,7 @@ func handleExceptions(c *gin.Context, width int64, height int64, quality int64, 
 	urlToProxy := extractUrl(c)
 	imgurUrl := regexp.MustCompile(`^https?://i?\.?imgur\.com/.+?$`)
 	// temporarily disable imgur proxying because of throttling
-	if imgurUrl.MatchString(urlToProxy) {
+	if viper.GetBool("redirect_special") && imgurUrl.MatchString(urlToProxy) {
 		c.Redirect(http.StatusTemporaryRedirect, urlToProxy)
 		return true
 	}
