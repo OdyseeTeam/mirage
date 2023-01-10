@@ -55,20 +55,35 @@ func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimiz
 		}
 		return webpBin, contentType, webPContentType, nil
 	} else if strings.Contains(contentType, "webp") {
+		//https://stackoverflow.com/questions/45190469/how-to-identify-whether-webp-image-is-static-or-animated
+		//https://scrn.storni.info/2023-01-10_15-44-22-701474914.png
+		//with an extra check for position 30-34 for this stupid case https://storage.googleapis.com/downloads.webmproject.org/webp/images/dancing_banana2.lossless.webp
+		if len(data) < 34 {
+			return data, contentType, webPContentType, nil
+		}
+		riff := bytes.Equal(data[0:4], []byte{0x52, 0x49, 0x46, 0x46})
+		simplewebp := bytes.Equal(data[8:12], []byte{0x57, 0x45, 0x42, 0x50})
+		vp8x := bytes.Equal(data[12:16], []byte{0x56, 0x50, 0x38, 0x58})
+		anim := bytes.Equal(data[20:24], []byte{0x41, 0x4e, 0x49, 0x4d})
+		anim2 := bytes.Equal(data[30:34], []byte{0x41, 0x4e, 0x49, 0x4d})
+
+		//it's animated, I don't know how to properly work on this
 		//explore https://github.com/h2non/bimg https://github.com/discord/lilliput
-		return data, contentType, webPContentType, nil
+		if riff && simplewebp && vp8x && (anim || anim2) {
+			return data, contentType, webPContentType, nil
+		}
 	} else if strings.Contains(contentType, "svg") {
 		return data, contentType, contentType, nil
-	} else {
-		img, err := readRawImage(data, contentType, 16383*16383)
-		if err != nil {
-			return nil, contentType, "", err
-		}
-		img = resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
-		err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
-		if err != nil {
-			return nil, contentType, "", errors.Err(err)
-		}
+	}
+
+	img, err := readRawImage(data, contentType, 16383*16383)
+	if err != nil {
+		return nil, contentType, "", err
+	}
+	img = resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
+	err = webp.Encode(&buf, img, &webp.Options{Lossless: false, Quality: float32(quality)})
+	if err != nil {
+		return nil, contentType, "", errors.Err(err)
 	}
 
 	return buf.Bytes(), contentType, webPContentType, nil

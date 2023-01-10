@@ -82,4 +82,4 @@ require (
 )
 
 //replace github.com/OdyseeTeam/gody-cdn => /home/niko/work/repositories/gody-cdn/
-replace github.com/lbryio/lbry.go/v2 => github.com/OdyseeTeam/lbry.go/v2 v2.7.2-0.20220927205634-77944ba3afab
+replace github.com/lbryio/lbry.go/v2 => github.com/OdyseeTeam/lbry.go/v2 v2.7.2-0.20221101212832-e6a3f4002995
