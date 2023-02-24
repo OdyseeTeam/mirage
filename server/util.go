@@ -63,6 +63,12 @@ func handleExceptions(c *gin.Context, width int64, height int64, quality int64, 
 			return true
 		}
 	}
+	malformedShttpsUrl := strings.Index(urlToProxy, "https:/t") == 0
+	if malformedShttpsUrl {
+		urlToProxy = strings.ReplaceAll(urlToProxy, "https:/t", "https://t")
+		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf(path, width, height, quality, url.QueryEscape(urlToProxy)))
+		return true
+	}
 	atWebp := strings.HasSuffix(urlToProxy, "@webp")
 	if atWebp {
 		urlToProxy = strings.TrimSuffix(urlToProxy, "@webp")
