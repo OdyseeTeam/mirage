@@ -45,6 +45,39 @@ func (o *Optimizer) Optimize(data []byte, quality, width, height int64) (optimiz
 	contentType := mimetype.Detect(data).String()
 	webPContentType := "image/webp"
 	if strings.Contains(contentType, "gif") {
+		//gif, err := gif.DecodeAll(bytes.NewReader(data))
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//webpanim := webpanimation.NewWebpAnimation(int(width), int(height), gif.LoopCount)
+		//webpanim.WebPAnimEncoderOptions.SetKmin(9)
+		//
+		//webpanim.WebPAnimEncoderOptions.SetKmax(17)
+		//
+		//defer webpanim.ReleaseMemory() // don't forget call this, or you will have memory leaks
+		//webpConfig := webpanimation.NewWebpConfig()
+		//webpConfig.SetLossless(1)
+		//webpConfig.SetLossless()
+		//
+		//timeline := 0
+		//
+		//for i, img := range gif.Image {
+		//	err = webpanim.AddFrame(img, timeline, webpConfig)
+		//	if err != nil {
+		//		log.Fatal(err)
+		//	}
+		//	timeline += gif.Delay[i] * 10
+		//}
+		//err = webpanim.AddFrame(nil, timeline, webpConfig)
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//
+		//err = webpanim.Encode(&buf) // encode animation and write result bytes in buffer
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+
 		converter := giftowebp.NewConverter()
 		converter.LoopCompatibility = false
 		converter.WebPConfig.SetQuality(float32(quality))

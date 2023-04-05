@@ -3,7 +3,7 @@ module github.com/OdyseeTeam/mirage
 go 1.19
 
 require (
-	github.com/Depado/ginprom v1.7.6
+	github.com/Depado/ginprom v1.7.7
 	github.com/OdyseeTeam/gody-cdn v1.0.7
 	github.com/bluele/gcache v0.0.2
 	github.com/chai2010/webp v1.1.1
@@ -21,7 +21,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/sizeofint/gif-to-webp v0.0.0-20210224202734-e9d7ed071591
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
 	golang.org/x/image v0.6.0
 )
@@ -45,7 +45,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20190915194858-d3ddacdb130f // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/johntdyer/slack-go v0.0.0-20230314151037-c5bf334f9b6e // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -86,4 +86,3 @@ require (
 )
 
 //replace github.com/OdyseeTeam/gody-cdn => /home/niko/work/repositories/gody-cdn/
-replace github.com/lbryio/lbry.go/v2 => github.com/OdyseeTeam/lbry.go/v2 v2.7.2-0.20221101212832-e6a3f4002995
