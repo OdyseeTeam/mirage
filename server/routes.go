@@ -153,6 +153,7 @@ func (s *Server) optimizeHandler(c *gin.Context) {
 		}
 		c.Header("Content-Length", fmt.Sprintf("%d", len(optimized)))
 		c.Header("X-mirage-original-mime", origMime)
+		c.Header("X-mirage-godycdn-hash", optimizedData.metadata.GodycdnHash)
 		c.Header("Cache-control", "max-age=31536000")
 		c.Data(200, optimizedMime, optimized)
 		return
